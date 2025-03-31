@@ -12,7 +12,7 @@ Usage: fintc <command> <file/dir>
 
 Commands:
     init   - initialize the given file/directory's integrity hash
-    check  - check integrity of the given file/directory
+    verify  - verify integrity of the given file/directory
     update - update the hash(es) of the given file/directory
     delete - delete the hash(es) of the given file/directory
 EOF
@@ -40,8 +40,8 @@ case ${1,,} in
     init)
         echo "init command detected"
         ;;
-    check)
-        echo "check command detected"
+    verify)
+        echo "verify command detected"
         ;;
     update)
         echo "update command detected"
