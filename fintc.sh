@@ -19,14 +19,38 @@ Commands:
 EOF
 }
 
+# print_fatal - prints a fatal message and exits
+#
+# Arguments:
+#   message: the message to print
+print_fatal() {
+    echo "[fatal]: $1"
+    exit 1
+}
+
+# print_error - prints a error message
+#
+# Arguments:
+#   message: the message to print
+print_error() {
+    echo "[error]: $1"
+}
+
+# print_info - prints a info message
+#
+# Arguments:
+#   message: the message to print
+print_info() {
+    echo "[info]: $1"
+}
+
 # ensure_dep - checks if a required dependancy is installed
 #
 # Arguments:
 #   dependancy: the name of the dependancy to check
 ensure_dep() {
     if ! command -v $1 &> /dev/null; then
-        echo "[fatal]: required dependancy '$1' isn't installed."
-        exit 1
+        print_fatal "required dependancy '$1' isn't installed."
     fi
 }
 
@@ -40,15 +64,15 @@ hash_file() {
 
     while read line; do
         if [[ $(echo $line | awk '{ print $2 }') = $file ]]; then
-            echo "[error]: file '$file' is already hashed."
+            print_error "file '$file' is already hashed."
             if [[ "${line%% *}" != "${hash%% *}" ]]; then
-                echo "[info]: hash mismatch. not updating..."
+                print_info "hash mismatch. not updating..."
             fi
             return
         fi
     done <<< "$FINTC_HASHES"
 
-    echo "[info]: file '$file' hashed"
+    print_info "file '$file' hashed"
     echo "$hash" >> "$FINTC_HOME/hashes"
 }
 
@@ -95,7 +119,7 @@ case ${1,,} in
         echo "delete command detected"
         ;;
     *)
-        echo "[error]: fintc command not recognized"
+        print_error "fintc command not recognized"
         print_usage
         exit 1
         ;;
