@@ -96,41 +96,24 @@ verify_file() {
     print_error "file '$file' not hashed"
 }
 
-# init_cmd - grabs hashes of the file(s) given
+# run_on - runs a given function/program on file(s)
 #
 # Arguments:
-#   file/dir: the file or directory to hash
-init_cmd() {
-    if [[ -d $1 ]]; then
-        local dir=$1
-        local files=$(find $dir -type f -exec realpath {} \;)
-        for item in $files; do
-            if [[ -f $item ]]; then
-                hash_file $item
-            fi
-        done
-    elif [[ -f $1 ]]; then
-        local file=$(realpath $1)
-        hash_file $file
-    fi
-}
+#   file/dir: the file or directory to run the function/program on
+#   func: the function to run on each file
+run_on() {
+    local file=$1
+    local func=$2
 
-# verify_cmd - corresponds to the `fintc verify` command
-#
-# Arguments:
-#   file/dir: the file or directory to run the command on
-verify_cmd() {
-    if [[ -d $1 ]]; then
-        local dir=$1
-        local files=$(find $dir -type f -exec realpath {} \;)
-        for item in $files; do
-            if [[ -f $item ]]; then
-                verify_file $item
+    if [[ -d $file ]]; then
+        local files=$(find $file -type f -exec realpath {} \;)
+        for f in $files; do
+            if [[ -f $f ]]; then
+                $func $f
             fi
         done
-    elif [[ -f $1 ]]; then
-        local file=$(realpath $1)
-        verify_file $file
+    elif [[ -f $file ]]; then
+        $func $(realpath $file)
     fi
 }
 
@@ -146,10 +129,10 @@ touch "$FINTC_HOME/hashes"
 
 case ${1,,} in
     init)
-        init_cmd $2
+        run_on $2 hash_file
         ;;
     verify)
-        verify_cmd $2
+        run_on $2 verify_file
         ;;
     update)
         echo "update command detected"
