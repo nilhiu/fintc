@@ -63,7 +63,7 @@ hash_file() {
     local hash=$(b3sum $file)
 
     while read line; do
-        if [[ $(echo $line | awk '{ print $2 }') = $file ]]; then
+        if [[ ${line##* } = $file ]]; then
             print_error "file '$file' is already hashed."
             if [[ "${line%% *}" != "${hash%% *}" ]]; then
                 print_info "hash mismatch. not updating..."
