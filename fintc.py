@@ -1,9 +1,16 @@
 import sys
 import os
+from hashlib import sha256
 
 
 FINTC_HOME = os.getenv("FINTC_HOME", "/var/lib/fintc")
 FINTC_HASHES_FILE = os.path.join(FINTC_HOME, "hashes")
+
+try:
+    with open(FINTC_HASHES_FILE, "r") as f:
+        FINTC_HASHES = f.read().splitlines()
+except Exception:
+    FINTC_HASHES = []
 
 
 def usage_str():
@@ -23,10 +30,51 @@ Commands:
     )
 
 
+def apply_on_dir_recursivly(path, func):
+    for root, _, files in os.walk(path):
+        for f in files:
+            func(os.path.realpath(os.path.join(root, f)))
+
+
+def apply_on_path(path, func):
+    if os.path.isdir(path):
+        apply_on_dir_recursivly(path, func)
+    elif os.path.isfile(path):
+        func(os.path.realpath(path))
+    else:
+        raise Exception(f"given path '{path}' isn't file or directory")
+
+
+def is_file_hashed(path):
+    for hash in FINTC_HASHES:
+        if path in hash:
+            return True
+    return False
+
+
+def write_hashes_file():
+    with open(FINTC_HASHES_FILE, "w") as f:
+        f.write("\n".join(FINTC_HASHES))
+
+
+def hash_file(path):
+    if is_file_hashed(path):
+        print(f"[error]: file '{path}' is already hashed")
+        return
+
+    with open(path, "rb") as f:
+        content = f.read()
+        hash = sha256(content).hexdigest()
+
+        print(f"[info]: file '{path}' hashed ({hash[:8]})")
+
+        FINTC_HASHES.append(f"{hash}\t{path}")
+
+
 def main(cmd, path):
     match cmd.lower():
         case "init":
-            print("init command detected")
+            apply_on_path(path, hash_file)
         case "verify":
             print("verify command detected")
         case "update":
@@ -37,6 +85,8 @@ def main(cmd, path):
             print(f"[error]: unknown command '{cmd}'")
             print_help()
             sys.exit(1)
+
+    write_hashes_file()
 
 
 if __name__ == "__main__":
