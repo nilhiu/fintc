@@ -2,6 +2,10 @@ import sys
 import os
 
 
+FINTC_HOME = os.getenv("FINTC_HOME", "/var/lib/fintc")
+FINTC_HASHES_FILE = os.path.join(FINTC_HOME, "hashes")
+
+
 def usage_str():
     return f"Usage: {sys.argv[0]} <command> <file/dir>"
 
