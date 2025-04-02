@@ -98,6 +98,16 @@ def update_file_hash(path):
     print(f"[error]: file '{path}' is not hashed")
 
 
+def delete_file_hash(path):
+    for i, h in enumerate(FINTC_HASHES):
+        if h.endswith(path):
+            FINTC_HASHES.pop(i)
+            print(f"[info]: file '{path}' hash deleted")
+            return
+
+    print(f"[error]: file '{path}' is not hashed")
+
+
 def main(cmd, path):
     match cmd.lower():
         case "init":
@@ -108,7 +118,7 @@ def main(cmd, path):
         case "update":
             apply_on_path(path, update_file_hash)
         case "delete":
-            print("delete command detected")
+            apply_on_path(path, delete_file_hash)
         case _:
             print(f"[error]: unknown command '{cmd}'")
             print_help()
