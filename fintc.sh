@@ -4,7 +4,8 @@ set -euo pipefail
 
 # FINTC_HOME is where all fintc files will reside (including file hashes)
 FINTC_HOME=${FINTC_HOME:-"/var/lib/fintc"}
-FINTC_HASHES=$(if [[ -f "$FINTC_HOME/hashes" ]]; then cat "$FINTC_HOME/hashes"; else echo ""; fi)
+FINTC_HASHES_FILE=$FINTC_HOME/hashes
+FINTC_HASHES=$(if [[ -f "$FINTC_HASHES_FILE" ]]; then cat $FINTC_HASHES_FILE; else echo ""; fi)
 
 # print_usage - prints the usage text of fintc
 print_usage() {
@@ -73,7 +74,7 @@ hash_file() {
     done <<< "$FINTC_HASHES"
 
     print_info "file '$file' hashed"
-    echo "$hash" >> "$FINTC_HOME/hashes"
+    echo "$hash" >> $FINTC_HASHES_FILE
 }
 
 # verify_file - verifies the given files hash with the saved one
@@ -94,6 +95,23 @@ verify_file() {
     done <<< "$FINTC_HASHES"
 
     print_error "file '$file' not hashed"
+}
+
+# update_hash - updates the given file's hash
+#
+# Arguments:
+#   file: the file whose hash to update
+update_hash() {
+    local file=$1
+    local hash=$(b3sum $file)
+
+    if ! grep $file $FINTC_HASHES_FILE &> /dev/null; then
+        print_error "file '$file' not hashed."
+        return
+    fi
+
+    sed -i "s!.*$file!$hash!" $FINTC_HASHES_FILE &> /dev/null
+    print_info "file '$file' hash updated."
 }
 
 # run_on - runs a given function/program on file(s)
@@ -125,7 +143,7 @@ if [[ $# -ne 2 ]]; then
 fi
 
 mkdir -p "$FINTC_HOME"
-touch "$FINTC_HOME/hashes"
+touch $FINTC_HASHES_FILE
 
 case ${1,,} in
     init)
@@ -135,7 +153,7 @@ case ${1,,} in
         run_on $2 verify_file
         ;;
     update)
-        echo "update command detected"
+        run_on $2 update_hash
         ;;
     delete)
         echo "delete command detected"
