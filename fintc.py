@@ -1,4 +1,3 @@
-from enum import verify
 import sys
 import os
 from hashlib import sha256
@@ -47,8 +46,8 @@ def apply_on_path(path, func):
 
 
 def is_file_hashed(path):
-    for hash in FINTC_HASHES:
-        if path in hash:
+    for h in FINTC_HASHES:
+        if h.endswith(path):
             return True
     return False
 
@@ -66,42 +65,37 @@ def hash_file(path):
     with open(path, "rb") as f:
         content = f.read()
         hash = sha256(content).hexdigest()
-
-        print(f"[info]: file '{path}' hashed ({hash[:8]})")
-
         FINTC_HASHES.append(f"{hash}\t{path}")
+        print(f"[info]: file '{path}' hashed ({hash[:8]})")
 
 
 def verify_file(path):
-    if not is_file_hashed(path):
-        print(f"[error]: file '{path}' is not hashed")
-        return
-
-    with open(path, "rb") as f:
-        content = f.read()
-        hash = sha256(content).hexdigest()
-        for h in FINTC_HASHES:
-            if path in h:
-                if hash not in h:
+    for h in FINTC_HASHES:
+        if h.endswith(path):
+            with open(path, "rb") as f:
+                content = f.read()
+                hash = sha256(content).hexdigest()
+                if not h.startswith(hash):
                     print(f"[error]: file '{path}' hash mismatch")
                 return
 
+    print(f"[error]: file '{path}' is not hashed")
+
 
 def update_file_hash(path):
-    if not is_file_hashed(path):
-        print(f"[error]: file '{path}' is not hashed")
-        return
-
-    with open(path, "rb") as f:
-        content = f.read()
-        hash = sha256(content).hexdigest()
-        for i, h in enumerate(FINTC_HASHES):
-            if path in h:
-                if hash in h:
+    for i, h in enumerate(FINTC_HASHES):
+        if h.endswith(path):
+            with open(path, "rb") as f:
+                content = f.read()
+                hash = sha256(content).hexdigest()
+                if h.startswith(hash):
                     print(f"[info]: file '{path}' hash unchanged")
                     return
+
                 FINTC_HASHES[i] = f"{hash}\t{path}"
                 print(f"[info]: file '{path}' hash updated ({hash[:8]})")
+
+    print(f"[error]: file '{path}' is not hashed")
 
 
 def main(cmd, path):
