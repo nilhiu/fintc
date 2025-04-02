@@ -1,3 +1,4 @@
+from enum import verify
 import sys
 import os
 from hashlib import sha256
@@ -71,12 +72,29 @@ def hash_file(path):
         FINTC_HASHES.append(f"{hash}\t{path}")
 
 
+def verify_file(path):
+    if not is_file_hashed(path):
+        print(f"[error]: file '{path}' is not hashed")
+        return
+
+    with open(path, "rb") as f:
+        content = f.read()
+        hash = sha256(content).hexdigest()
+        for h in FINTC_HASHES:
+            if path in h:
+                if hash not in h:
+                    print(f"[error]: file '{path}' hash mismatch")
+                return
+        print(f"[error]: file '{path}' not hashed")
+
+
 def main(cmd, path):
     match cmd.lower():
         case "init":
             apply_on_path(path, hash_file)
         case "verify":
-            print("verify command detected")
+            apply_on_path(path, verify_file)
+            return  # skip hashes file write
         case "update":
             print("update command detected")
         case "delete":
