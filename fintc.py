@@ -212,12 +212,15 @@ def main(cmd, path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) < 3:
         if len(sys.argv) == 2 and sys.argv[1].lower() == "help":
             print_help()
             sys.exit(0)
 
         print_error("command or file/directory wasn't provided")
+        sys.exit(usage_str())
+    elif len(sys.argv) > 3:
+        print_error("excess arguments were given")
         sys.exit(usage_str())
 
     main(sys.argv[1], sys.argv[2])
