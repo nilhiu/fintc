@@ -182,6 +182,9 @@ def main(cmd, path):
             apply_on_path(path, update_file_hash)
         case "delete":
             apply_on_path(path, delete_file_hash)
+        case "help":
+            print_help()
+            return
         case _:
             print(f"[error]: unknown command '{cmd}'")
             print_help()
