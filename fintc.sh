@@ -76,6 +76,26 @@ hash_file() {
     echo "$hash" >> "$FINTC_HOME/hashes"
 }
 
+# verify_file - verifies the given files hash with the saved one
+#
+# Arguments:
+#   file: the file to verify
+verify_file() {
+    local file=$1
+    local hash=$(b3sum $file)
+
+    while read line; do
+        if [[ "${line##* }" = "$file" ]]; then
+            if [[ "${line%% *}" != "${hash%% *}" ]]; then
+                print_error "file '$file' hash mismatch."
+            fi
+            return
+        fi
+    done <<< "$FINTC_HASHES"
+
+    print_error "file '$file' not hashed"
+}
+
 # init_cmd - grabs hashes of the file(s) given
 #
 # Arguments:
@@ -95,6 +115,25 @@ init_cmd() {
     fi
 }
 
+# verify_cmd - corresponds to the `fintc verify` command
+#
+# Arguments:
+#   file/dir: the file or directory to run the command on
+verify_cmd() {
+    if [[ -d $1 ]]; then
+        local dir=$1
+        local files=$(find $dir -type f -exec realpath {} \;)
+        for item in $files; do
+            if [[ -f $item ]]; then
+                verify_file $item
+            fi
+        done
+    elif [[ -f $1 ]]; then
+        local file=$(realpath $1)
+        verify_file $file
+    fi
+}
+
 ensure_dep b3sum
 
 if [[ $# -ne 2 ]]; then
@@ -110,7 +149,7 @@ case ${1,,} in
         init_cmd $2
         ;;
     verify)
-        echo "verify command detected"
+        verify_cmd $2
         ;;
     update)
         echo "update command detected"
