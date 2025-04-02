@@ -3,13 +3,19 @@ import os
 from hashlib import sha256
 
 
+#: The home directory for fintc. If `FINTC_HOME` environment variable isn't set
+#: `/var/lib/fintc` is used.
 FINTC_HOME = os.getenv("FINTC_HOME", "/var/lib/fintc")
+
+#: The file path where fintc's hashes are stored.
 FINTC_HASHES_FILE = os.path.join(FINTC_HOME, "hashes")
 
 try:
     with open(FINTC_HASHES_FILE, "r") as f:
+        #: The list of hashes read from `FINTC_HASHES_FILE`.
         FINTC_HASHES = f.read().splitlines()
 except Exception:
+    #: Defaults to an empty list if `FINTC_HASHES_FILE` can't be read.
     FINTC_HASHES = []
 
 
@@ -30,15 +36,32 @@ Commands:
     )
 
 
-def apply_on_dir_recursivly(path, func):
+def apply_on_dir_recursively(path, func):
+    """
+    Apply the provided function on the given directory recusively.
+
+    Args:
+        path (str): path to a directory.
+        func (Callable[[str],None]): function to apply on `path`.
+    """
     for root, _, files in os.walk(path):
         for f in files:
             func(os.path.realpath(os.path.join(root, f)))
 
 
 def apply_on_path(path, func):
+    """
+    Apply the provided function on the given path.
+
+    Args:
+        path (str): path to a file or directory.
+        func (Callable[[str],None]): function to apply on `path`.
+
+    Raises:
+        Exception: if `path` is neither a file or directory.
+    """
     if os.path.isdir(path):
-        apply_on_dir_recursivly(path, func)
+        apply_on_dir_recursively(path, func)
     elif os.path.isfile(path):
         func(os.path.realpath(path))
     else:
@@ -46,6 +69,12 @@ def apply_on_path(path, func):
 
 
 def is_file_hashed(path):
+    """
+    Check if the given file is hashed.
+
+    Args:
+        path (str): path to a file.
+    """
     for h in FINTC_HASHES:
         if h.endswith(path):
             return True
@@ -53,11 +82,20 @@ def is_file_hashed(path):
 
 
 def write_hashes_file():
+    """
+    Write the hashes saved in `FINTC_HASHES` to `FINTIC_HASHES_FILE`.
+    """
     with open(FINTC_HASHES_FILE, "w") as f:
         f.write("\n".join(FINTC_HASHES))
 
 
 def hash_file(path):
+    """
+    Save the hash of the given file.
+
+    Args:
+        path (str): path to a file.
+    """
     if is_file_hashed(path):
         print(f"[error]: file '{path}' is already hashed")
         return
@@ -70,6 +108,12 @@ def hash_file(path):
 
 
 def verify_file(path):
+    """
+    Verify the saved hash of the given file.
+
+    Args:
+        path (str): path to a file.
+    """
     for h in FINTC_HASHES:
         if h.endswith(path):
             with open(path, "rb") as f:
@@ -83,6 +127,12 @@ def verify_file(path):
 
 
 def update_file_hash(path):
+    """
+    Update the saved hash of the given file.
+
+    Args:
+        path (str): path to a file.
+    """
     for i, h in enumerate(FINTC_HASHES):
         if h.endswith(path):
             with open(path, "rb") as f:
@@ -99,6 +149,12 @@ def update_file_hash(path):
 
 
 def delete_file_hash(path):
+    """
+    Delete the saved hash of the given file.
+
+    Args:
+        path (str): path to a file.
+    """
     for i, h in enumerate(FINTC_HASHES):
         if h.endswith(path):
             FINTC_HASHES.pop(i)
@@ -109,6 +165,13 @@ def delete_file_hash(path):
 
 
 def main(cmd, path):
+    """
+    Main method.
+
+    Args:
+        cmd (str): command to run.
+        path (str): path to a file or directory to run the command on.
+    """
     match cmd.lower():
         case "init":
             apply_on_path(path, hash_file)
