@@ -28,13 +28,12 @@ if ANSI_SUPPORTED:
 else:
     RED = CYAN = RESET = ""
 
-
-def usage_str():
-    return f"{CYAN}Usage:{RESET} {sys.argv[0]} <command> <path>"
+#: Usage string for fintc
+USAGE_STRING = f"{CYAN}Usage:{RESET} {sys.argv[0]} <command> <path>"
 
 
 def print_help():
-    print(usage_str())
+    print(USAGE_STRING)
     print(
         rf"""
 {CYAN}Commands:{RESET}
@@ -218,9 +217,9 @@ if __name__ == "__main__":
             sys.exit(0)
 
         print_error("command or file/directory wasn't provided")
-        sys.exit(usage_str())
+        sys.exit(USAGE_STRING)
     elif len(sys.argv) > 3:
         print_error("excess arguments were given")
-        sys.exit(usage_str())
+        sys.exit(USAGE_STRING)
 
     main(sys.argv[1], sys.argv[2])
