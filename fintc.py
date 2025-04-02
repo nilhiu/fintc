@@ -30,7 +30,7 @@ else:
 
 
 def usage_str():
-    return f"{CYAN}Usage:{RESET} {sys.argv[0]} <command> <file/dir>"
+    return f"{CYAN}Usage:{RESET} {sys.argv[0]} <command> <path>"
 
 
 def print_help():
@@ -39,10 +39,10 @@ def print_help():
         rf"""
 {CYAN}Commands:{RESET}
     {CYAN}help{RESET}   - displays this help message
-    {CYAN}init{RESET}   - initialize the given file/directory's integrity hash(es)
-    {CYAN}verify{RESET} - verify integrity of the given file/directory
-    {CYAN}update{RESET} - update the hash(es) of the given file/directory
-    {CYAN}delete{RESET} - delete the hash(es) of the given file/directory"""
+    {CYAN}init{RESET}   - initialize integrity hash(es) for the given path
+    {CYAN}verify{RESET} - verify integrity of the given path
+    {CYAN}update{RESET} - update the hash(es) of the given path
+    {CYAN}delete{RESET} - delete the hash(es) of the given path"""
     )
 
 
