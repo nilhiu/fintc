@@ -18,22 +18,40 @@ except Exception:
     #: Defaults to an empty list if `FINTC_HASHES_FILE` can't be read.
     FINTC_HASHES = []
 
+#: Are ANSI escape codes supported.
+ANSI_SUPPORTED = sys.stdout.isatty() and os.getenv("TERM", "") != "dumb"
+
+if ANSI_SUPPORTED:
+    RED = "\033[91;1m"
+    CYAN = "\033[96;1m"
+    RESET = "\033[0m"
+else:
+    RED = CYAN = RESET = ""
+
 
 def usage_str():
-    return f"Usage: {sys.argv[0]} <command> <file/dir>"
+    return f"{CYAN}Usage:{RESET} {sys.argv[0]} <command> <file/dir>"
 
 
 def print_help():
     print(usage_str())
     print(
-        r"""
-Commands:
-    help   - displays this help message
-    init   - initialize the given file/directory's integrity hash(es)
-    verify - verify integrity of the given file/directory
-    update - update the hash(es) of the given file/directory
-    delete - delete the hash(es) of the given file/directory"""
+        rf"""
+{CYAN}Commands:{RESET}
+    {CYAN}help{RESET}   - displays this help message
+    {CYAN}init{RESET}   - initialize the given file/directory's integrity hash(es)
+    {CYAN}verify{RESET} - verify integrity of the given file/directory
+    {CYAN}update{RESET} - update the hash(es) of the given file/directory
+    {CYAN}delete{RESET} - delete the hash(es) of the given file/directory"""
     )
+
+
+def print_error(msg):
+    print(f"{RED}[error]:{RESET} {msg}")
+
+
+def print_info(msg):
+    print(f"{CYAN}[info]:{RESET} {msg}")
 
 
 def apply_on_dir_recursively(path, func):
@@ -97,14 +115,14 @@ def hash_file(path):
         path (str): path to a file.
     """
     if is_file_hashed(path):
-        print(f"[error]: file '{path}' is already hashed")
+        print_error(f"file '{path}' is already hashed")
         return
 
     with open(path, "rb") as f:
         content = f.read()
         hash = sha256(content).hexdigest()
         FINTC_HASHES.append(f"{hash}\t{path}")
-        print(f"[info]: file '{path}' hashed ({hash[:8]})")
+        print_info(f"file '{path}' hashed ({hash[:8]})")
 
 
 def verify_file(path):
@@ -120,10 +138,10 @@ def verify_file(path):
                 content = f.read()
                 hash = sha256(content).hexdigest()
                 if not h.startswith(hash):
-                    print(f"[error]: file '{path}' hash mismatch")
+                    print_error(f"file '{path}' hash mismatch")
                 return
 
-    print(f"[error]: file '{path}' is not hashed")
+    print_error(f"file '{path}' is not hashed")
 
 
 def update_file_hash(path):
@@ -139,13 +157,13 @@ def update_file_hash(path):
                 content = f.read()
                 hash = sha256(content).hexdigest()
                 if h.startswith(hash):
-                    print(f"[info]: file '{path}' hash unchanged")
+                    print_info(f"file '{path}' hash unchanged")
                     return
 
                 FINTC_HASHES[i] = f"{hash}\t{path}"
-                print(f"[info]: file '{path}' hash updated ({hash[:8]})")
+                print_info(f"file '{path}' hash updated ({hash[:8]})")
 
-    print(f"[error]: file '{path}' is not hashed")
+    print_error(f"file '{path}' is not hashed")
 
 
 def delete_file_hash(path):
@@ -158,10 +176,10 @@ def delete_file_hash(path):
     for i, h in enumerate(FINTC_HASHES):
         if h.endswith(path):
             FINTC_HASHES.pop(i)
-            print(f"[info]: file '{path}' hash deleted")
+            print_info(f"file '{path}' hash deleted")
             return
 
-    print(f"[error]: file '{path}' is not hashed")
+    print_error(f"file '{path}' is not hashed")
 
 
 def main(cmd, path):
@@ -186,7 +204,7 @@ def main(cmd, path):
             print_help()
             return
         case _:
-            print(f"[error]: unknown command '{cmd}'")
+            print_error(f"unknown command '{cmd}'")
             print_help()
             sys.exit(1)
 
@@ -199,7 +217,7 @@ if __name__ == "__main__":
             print_help()
             sys.exit(0)
 
-        print("[error]: command or file/directory wasn't provided")
+        print_error("command or file/directory wasn't provided")
         sys.exit(usage_str())
 
     main(sys.argv[1], sys.argv[2])
