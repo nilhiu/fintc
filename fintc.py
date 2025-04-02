@@ -85,7 +85,23 @@ def verify_file(path):
                 if hash not in h:
                     print(f"[error]: file '{path}' hash mismatch")
                 return
-        print(f"[error]: file '{path}' not hashed")
+
+
+def update_file_hash(path):
+    if not is_file_hashed(path):
+        print(f"[error]: file '{path}' is not hashed")
+        return
+
+    with open(path, "rb") as f:
+        content = f.read()
+        hash = sha256(content).hexdigest()
+        for i, h in enumerate(FINTC_HASHES):
+            if path in h:
+                if hash in h:
+                    print(f"[info]: file '{path}' hash unchanged")
+                    return
+                FINTC_HASHES[i] = f"{hash}\t{path}"
+                print(f"[info]: file '{path}' hash updated ({hash[:8]})")
 
 
 def main(cmd, path):
@@ -96,7 +112,7 @@ def main(cmd, path):
             apply_on_path(path, verify_file)
             return  # skip hashes file write
         case "update":
-            print("update command detected")
+            apply_on_path(path, update_file_hash)
         case "delete":
             print("delete command detected")
         case _:
