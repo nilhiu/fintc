@@ -114,6 +114,23 @@ update_hash() {
     print_info "file '$file' hash updated."
 }
 
+# delete_hash - deletes the given file's hash
+#
+# Arguments:
+#   file: the file whose hash to delete
+delete_hash() {
+    local file=$1
+    local hash=$(b3sum $file)
+
+    if ! grep $file $FINTC_HASHES_FILE &> /dev/null; then
+        print_error "file '$file' not hashed."
+        return
+    fi
+
+    sed -i "\!$file!d" $FINTC_HASHES_FILE &> /dev/null
+    print_info "file '$file' hash deleted."
+}
+
 # run_on - runs a given function/program on file(s)
 #
 # Arguments:
@@ -156,7 +173,7 @@ case ${1,,} in
         run_on $2 update_hash
         ;;
     delete)
-        echo "delete command detected"
+        run_on $2 delete_hash
         ;;
     *)
         print_error "fintc command not recognized"
