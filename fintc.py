@@ -55,6 +55,17 @@ def print_info(msg):
     print(f"{CYAN}[info]:{RESET} {msg}")
 
 
+def create_home_directory():
+    """
+    Create `FINTC_HOME` directory and `FINTC_HASHES_FILE` if it doesn't exist.
+    """
+    if not os.path.exists(FINTC_HOME):
+        os.mkdir(FINTC_HOME)
+    if not os.path.exists(FINTC_HASHES_FILE):
+        with open(FINTC_HASHES_FILE, "a"):
+            pass
+
+
 def apply_on_dir_recursively(path, func):
     """
     Apply the provided function on the given directory recusively.
@@ -191,6 +202,8 @@ def main(cmd, path):
         cmd (str): command to run.
         path (str): path to a file or directory to run the command on.
     """
+    create_home_directory()
+
     match cmd.lower():
         case "init":
             apply_on_path(path, hash_file)
