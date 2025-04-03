@@ -29,7 +29,9 @@ else:
     RED = CYAN = RESET = ""
 
 #: Usage string for fintc
-USAGE_STRING = f"{CYAN}Usage:{RESET} {sys.argv[0]} <command> <path>"
+USAGE_STRING = (
+    f"{CYAN}Usage:{RESET} {os.path.split(sys.argv[0])[1]} <command> <path>"
+)
 
 
 def print_help():
