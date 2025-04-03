@@ -73,7 +73,8 @@ If you want to use the Python variant, just change `./fintc.sh` to
 ### Linux/macOS
 
 On Linux or macOS, you will have to copy one of the scripts into `/usr/bin/`,
-or to `$HOME/.local/bin/` if you have it in your PATH.
+or to `$HOME/.local/bin/` if you have it in your PATH. Also, don't forget to
+add execution privileges to the script: `chmod u+x fintc.{sh,py}`.
 
 If installing the Python script, you will need to add the following to the
 top of the Python script:
