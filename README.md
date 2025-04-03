@@ -76,13 +76,6 @@ On Linux or macOS, you will have to copy one of the scripts into `/usr/bin/`,
 or to `$HOME/.local/bin/` if you have it in your PATH. Also, don't forget to
 add execution privileges to the script: `chmod u+x fintc.{sh,py}`.
 
-If installing the Python script, you will need to add the following to the
-top of the Python script:
-
-```py
-#!/usr/bin/env python3
-```
-
 You can also then rename the script to remove the `.sh` or `.py` file extension.
 
 ### Windows
